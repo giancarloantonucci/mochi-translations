@@ -19,6 +19,15 @@ The `translations.edn` file is a large map of IETF language tags to localization
 ```
 To add a new language, simply add a new key that matches the IETF tag for your language. Then copy the key-value pairs from the :en dictionary and change the strings to your language.
 
+### Custom display name
+
+The names of some less common languages will not be automatically detected by their language tag (e.g. most ISO 639-3 languages). In this case, you can add a special `:self/display-name` attribute to your translation map.
+```clj
+{:scn
+ {:self/display-name {:name "Sicilian"
+                      :native-name "sicilianu"}}}
+```
+
 ## Testing your changes
 1. Open Mochi
 2. Navigate to Settings → General
