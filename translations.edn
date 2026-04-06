@@ -417,8 +417,20 @@
 
   :auto-update/check-for-updates "Check for updates"
   :auto-update
-  {:auto-update.status/update-available "A new version is available!"
+  {:auto-update.status/download-and-install "Download and install"
+   :auto-update.status/update-available "A new version is available!"
    :auto-update.status/beta-available   [:<> "A new " [:strong "beta"] " version is available!"]
+   :auto-update.status/desc
+   (fn [update-version]
+     [:<>
+      [:a {:style {:font-style "italic"
+                   :text-decoration "underline"
+                   "&:hover" {:text-decoration "underline"}}
+           :href (if (includes? update-version "beta")
+                   "https://mochi.cards/beta-changelog/"
+                   "https://mochi.cards/changelog/")
+           :target "_blank"}
+       "Click here"] " to see what's new."])
    :auto-update.status/backing-up       "Backing up..."
    :auto-update.status/downloading      "Downloading..."
    :auto-update.status/downloaded       "Restart to update"
@@ -628,16 +640,20 @@
   ;; TODO: Change copy depending on state.
   :banners/web-free-account-warning
   [:div
-   [:strong "Data not backed up"]
+   [:strong "Data not backed up and may be lost"]
    [:br]
    [:span {:style {:margin-right "6px"}}
-    "Upgrade to sync your content or download the app."]]
+    "Data stored in the browser is temporary."
+    [:br]
+    "Download the app or upgrade to sync your data."]]
   :banners/web-no-account-warning
   [:div
-   [:strong "Data not backed up"]
+   [:strong "Data not backed up and may be lost"]
    [:br]
    [:span {:style {:margin-right "6px"}}
-    "Sign in or register to sync your content."]]
+    "Data stored in the browser is temporary."
+    [:br]
+    "Download the app or sign up to sync your data."]]
 
   :banner/published-deck [:<> "This is a published deck. You can look around and make" [:br] "changes, but you'll have to clone it to save changes."]
 
@@ -852,6 +868,7 @@
   :onboarding/desc "Mochi is a tool for creating notes and flash cards to help you remember things."
   :onboarding/get-started "Get started"
   :onboarding/already-have-an-account? "Already have an account?"
+  :onboarding/log-in "Log in"
 
   :log-in-form/title "Log in to your account"
   :log-in-form/desc "If you have a Mochi account, log in below to sync your cards and data."
@@ -976,7 +993,7 @@
   :transcription/attachment-not-found-error "Input attachment not found."
   :transcription/attachment-too-large-error "Input attachment exceeds max file size of 1MB."
   :modal.settings/inherited-setting-label (fn [x] [:<> "Using default: " [:strong x]])
-  :modal.settings/inherited-setting-tooltip-deck #(str "This setting has been inherited from the deck " %)
+  :modal.settings/inherited-setting-tooltip-deck (fn [deck-name] (str "This setting has been inherited from the deck " deck-name))
   :modal.settings/inherited-setting-tooltip-global "This setting has been inherited from Base settings"
 
   :modal.settings.sections/account "Account"
@@ -1024,7 +1041,11 @@
   :settings.custom-translation/loading "Loading..."
 
   :preferences/css-theme:no-theme "No theme"
-  :preferences/css-theme:new-theme "Add theme"}
+  :preferences/css-theme:new-theme "Add theme"
+
+  :pages.review.review-mode-selector/inbox "All cards"
+  :pages.review/shuffle-button "Shuffle"
+  :pages.review/shuffle-button:tooltip "Randomize the order of cards"}
 
 
  :ja {
@@ -1053,6 +1074,7 @@
       :onboarding/desc "Mochiは、物事を覚えるためのメモやフラッシュカードを作成するためのツールです。"
       :onboarding/get-started "開始"
       :onboarding/already-have-an-account? "アカウントをお持ちですか？"
+      :onboarding/log-in "ログイン"
 
       :log-in-form/title "ログインする"
       :log-in-form/desc "Mochi Proアカウントをお持ちの方、 下記からログインしてカードとデータを同期してください。"
@@ -1139,6 +1161,15 @@
 
       :add-card "新規カード"
 
+      ;; [スペース]キーを押して「覚えている」にマークするか、[F]キーを押して「忘れた」にマークしてください。
+      :review/last-side-hint
+      (fn [r f]
+        [:<> r "キーを押して「覚えている」にマークするか、" f "キーを押して「忘れた」にマークしてください。"])
+        ; [:<> "Press " r " to mark as remembered, or " f " as forgot."])
+
+      :learn/last-side-hint
+      (fn [r f] [:<> "Press " r " to add to reviews, or " f " review again."])
+
       ;; Modal message
       :imported-deck-already-exists "このデックはもうあります。"
       :imported-note-already-exists "このメーモはもうあります。"
@@ -1147,10 +1178,26 @@
       ;; Auto card generation from notes.
       :no-new-cards-found "新規カードを見つけられません。"
 
-      :auto-update {:update-available "アップデート！"
-                    :backing-up       "バックアップ中…"
-                    :downloading      "ダウンロード中…"
-                    :downloaded       "アップデートするためにリスタート"}
+      :auto-update
+      {:auto-update.status/download-and-install "ダウンロードしてインストールする"
+       :auto-update.status/update-available "新しいバージョンが利用可能になりました！"
+       :auto-update.status/beta-available   [:<> "新しい" [:strong "ベータ版"] "が公開されました！"]
+       :auto-update.status/desc
+       (fn [update-version]
+         [:<>
+          "新着情報は"
+          [:a {:style {:font-style "italic"
+                       :text-decoration "underline"
+                       "&:hover" {:text-decoration "underline"}}
+               :href (if (includes? update-version "beta")
+                       "https://mochi.cards/beta-changelog/"
+                       "https://mochi.cards/changelog/")
+               :target "_blank"}
+           "こちらをご覧ください。"]])
+       :auto-update.status/backing-up       "バックアップ中……"
+       :auto-update.status/downloading      "ダウンロード中..."
+       :auto-update.status/downloaded       "更新するには再起動してください"
+       :auto-update.status/failed           "更新に失敗しました"}
 
       :update-credit-card "クレジットカードを変える"
       :updating-credit-card "クレジットカードを変える中"
@@ -1274,4 +1321,8 @@
       
       :alert.cannot-delete-template/title "テンプレートを消去できません。"
       :alert.cannot-delete-template/cards-using "このテンプレートを使ったカードがあります。"
-      :alert.cannot-delete-template/delete-cards-first "これらのカードを削除するか、別のテンプレートに変更してください。"}}
+      :alert.cannot-delete-template/delete-cards-first "これらのカードを削除するか、別のテンプレートに変更してください。"
+
+      :pages.review.review-mode-selector/inbox "すべてのカード"
+      :pages.review/shuffle-button "シャッフルする"
+      :pages.review/shuffle-button:tooltip "カードの順番をランダムにする"}}
